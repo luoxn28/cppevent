@@ -8,11 +8,11 @@ typedef void *(*EventCallback)(int fd, void *arg);
  * event struct.
  */
 struct Event
-{
-	short event;
-	int   fd;
-	EventCallback callback;
-	void *arg;
+{
+	short event;			 /* the event you want to monitor */
+	int   fd;				 /* the fd want to monitor */
+	EventCallback callback; /* the callback function */
+	void *arg;			     /* the parameter of callback function */
 };
 
 #endif
