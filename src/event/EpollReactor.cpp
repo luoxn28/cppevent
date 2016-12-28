@@ -41,6 +41,7 @@ int EpollReactor::delEvent(int fd)
 	
 	if (this->events.count(fd)) {
 		errCode = epoll_ctl(this->epollFd, EPOLL_CTL_DEL, fd, NULL);
+		this->events.erase(fd);
 	}
 
 	return errCode;

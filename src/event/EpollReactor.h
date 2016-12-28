@@ -32,9 +32,9 @@ public:
 		this->epollSize = epollSize;
 	}
 	virtual ~EpollReactor() {
-		if (0 != epollFd) {
-			close(epollFd);
-			epollFd = 0;
+		if (0 != this->epollFd) {
+			close(this->epollFd);
+			this->epollFd = 0;
 		}
 	}
 	
@@ -47,10 +47,18 @@ public:
 		return this->epollFd;
 	}
 
+	int getEpollSize() {
+		return this->epollSize;
+	}
+
+	int getEventsSize() {
+		return this->events.size();
+	}
+
 private:
 	void init() {
-		epollFd = 0;
-		epollSize = 0;
+		this->epollFd = 0;
+		this->epollSize = 0;
 	}
 };
 

@@ -42,7 +42,7 @@ void *connCallback(int fd, short events, void *arg)
 		int len = recv(fd, buff, sizeof(buff) - 1, 0);
 		if (len > 0) {
 			buff[len] = '\0';
-			cout << "recv: " << buff << endl;
+			cout << fd << " recv: " << buff << endl;
 		}
 		else if (len == 0) {
 			cout << fd << ": client close" << endl;
@@ -101,6 +101,7 @@ int main(int argc, char **argv)
 
 	while (gRunning) {
 		gReactor.dispatcher();
+		//cout << "event nums: " << gReactor.getEventsSize() << endl;
 	}
 
 	return 0;
