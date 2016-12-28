@@ -2,6 +2,7 @@
 #define _EPOLLREACTOR_H_
 
 #include <iostream>
+#include <map>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,6 +17,7 @@ class EpollReactor : public IReactor
 private:
 	int epollFd;
 	int epollSize;
+	std::map<int, Event> events;
 	
 public:
  	EpollReactor() : EpollReactor(32) { }
@@ -38,6 +40,7 @@ public:
 	
 	virtual int addEvent(const Event &event);
 	virtual int delEvent(const Event &event);
+	virtual int delEvent(int fd);
 	virtual int dispatcher();
 
 	int getEpollFd() {
