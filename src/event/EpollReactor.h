@@ -35,6 +35,14 @@ public:
 		if (0 != this->epollFd) {
 			close(this->epollFd);
 			this->epollFd = 0;
+
+			for (std::map<int, Event>::iterator iter = this->events.begin();
+				 iter != this->events.end(); iter++) {
+				 if (iter->first > 0) {
+				 	close(iter->first);
+				 }
+			}
+			
 		}
 	}
 	

@@ -4,14 +4,14 @@
 #include <string.h>
 
 /* event callback function */
-typedef void *(*EventCallback)(int fd, short events, void *arg);
+typedef void *(*EventCallback)(int fd, unsigned int events, void *arg);
 
 /**
  * event struct.
  */
 struct Event
 {
-	short events;			 /* the event you want to monitor */
+	unsigned int events;			 /* the event you want to monitor */
 	int   fd;				 /* the fd want to monitor */
 	EventCallback callback; /* the callback function */
 	void *arg;			     /* the parameter of callback function */

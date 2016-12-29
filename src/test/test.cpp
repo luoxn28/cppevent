@@ -21,7 +21,7 @@ using namespace std;
 EpollReactor gReactor;
 bool gRunning = true;
 
-void *stdinCallback(int fd, short events, void *arg)
+void *stdinCallback(int fd, unsigned int events, void *arg)
 {
 	string input;
 
@@ -34,7 +34,7 @@ void *stdinCallback(int fd, short events, void *arg)
 	}
 }
 
-void *connCallback(int fd, short events, void *arg)
+void *connCallback(int fd, unsigned int events, void *arg)
 {
 	if (events & EPOLLIN) {
 		char buff[512];
@@ -51,7 +51,7 @@ void *connCallback(int fd, short events, void *arg)
 	}
 }
 
-void *listenCallback(int fd, short events, void *arg)
+void *listenCallback(int fd, unsigned int events, void *arg)
 {
 	if (events & EPOLLIN) {
 		int conn = accept(fd, NULL, NULL);
