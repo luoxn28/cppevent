@@ -4,14 +4,27 @@
 int EpollReactor::addEvent(const Event &event)
 {
 	int errCode = 0;
-	epoll_event epollev;
 
-	epollev.data.fd = event.fd;
-	epollev.events  = event.events;
-	errCode = epoll_ctl(this->epollFd, EPOLL_CTL_ADD, event.fd, &epollev);
-	if (errCode < 0) {
-		std::cerr << "epoll_ctl error" << std::endl;
-		return errCode;
+	if (event.flag == EVENT_FLAG_EVENT) {
+		epoll_event epollev;
+		epollev.data.fd = event.fd;
+		epollev.events  = event.events;
+		errCode = epoll_ctl(this->epollFd, EPOLL_CTL_ADD, event.fd, &epollev);
+		if (errCode < 0) {
+			std::cerr << "epoll_ctl error" << std::endl;
+			return errCode;
+		}
+	}
+	else if (event.flag == EVENT_FLAG_TIMER) {
+		if (event.fd == 0) {
+			event.fd = timerfd_create(CLOCK_REALTIME, 0);
+			if (event.fd < 0) {
+				std::cerr << "timerfd_create error" << std::endl;
+				return (errCode = 1);
+			}
+
+			timerfd_settime(event.fd, 0, &event.data.timer.value, NULL);
+		}
 	}
 
 	this->events[event.fd] = event;
