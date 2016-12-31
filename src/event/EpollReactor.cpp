@@ -1,33 +1,32 @@
 #include "EpollReactor.h"
 
 
-int EpollReactor::addEvent(const Event &event)
+int EpollReactor::addEvent(Event *pevent)
 {
 	int errCode = 0;
 
-	if (event.flag == EVENT_FLAG_EVENT) {
-		epoll_event epollev;
-		epollev.data.fd = event.fd;
-		epollev.events  = event.events;
-		errCode = epoll_ctl(this->epollFd, EPOLL_CTL_ADD, event.fd, &epollev);
-		if (errCode < 0) {
-			std::cerr << "epoll_ctl error" << std::endl;
-			return errCode;
-		}
-	}
-	else if (event.flag == EVENT_FLAG_TIMER) {
-		if (event.fd == 0) {
-			event.fd = timerfd_create(CLOCK_REALTIME, 0);
-			if (event.fd < 0) {
+	if (pevent->flag == EVENT_FLAG_TIMER) {
+		if (pevent->fd == 0) {
+			pevent->fd = timerfd_create(CLOCK_REALTIME, 0);
+			if (pevent->fd < 0) {
 				std::cerr << "timerfd_create error" << std::endl;
 				return (errCode = 1);
 			}
 
-			timerfd_settime(event.fd, 0, &event.data.timer.value, NULL);
+			timerfd_settime(pevent->fd, 0, &(pevent->data.timer.value), NULL);
 		}
 	}
 
-	this->events[event.fd] = event;
+	epoll_event epollev;
+	epollev.data.fd = pevent->fd;
+	epollev.events  = pevent->events;
+	errCode = epoll_ctl(this->epollFd, EPOLL_CTL_ADD, pevent->fd, &epollev);
+	if (errCode < 0) {
+		std::cerr << "epoll_ctl error" << std::endl;
+		return errCode;
+	}
+
+	this->events[pevent->fd] = *pevent;
 	return errCode;
 }
 
@@ -71,10 +70,31 @@ int EpollReactor::dispatcher()
 	}
 
 	for (int i = 0; i < nevents; i++) {
-		Event event = this->events[epollevs[i].data.fd];
+		Event *pevent = &(this->events[epollevs[i].data.fd]);
 
-		if (event.callback) {
-			event.callback(event.fd, event.events, event.arg);
+		if (pevent->callback) {
+			switch (pevent->flag) {
+				case EVENT_FLAG_EVENT:
+					pevent->callback(pevent->fd, pevent->events, pevent->arg);
+					break;
+
+				case EVENT_FLAG_TIMER:
+					if (pevent->data.timer.num == -1) {
+						pevent->callback(pevent->fd, pevent->events, pevent->arg);
+					}
+					else if (pevent->data.timer.num > 0) {
+						pevent->callback(pevent->fd, pevent->events, pevent->arg);
+						pevent->data.timer.num--;
+					}
+					else if (pevent->data.timer.num == 0) {
+						delEvent(pevent->fd);
+					}
+					break;
+				
+				default:
+					std::cerr << "dispatcher default" << std::endl;
+					break;
+			}
 		}
 	}
 

@@ -57,15 +57,24 @@ void *listenCallback(int fd, unsigned int events, void *arg)
 		if (conn > 0) {
 			Event event;
 
+			event.flag = EVENT_FLAG_EVENT;
 			event.fd = conn;
 			event.events = EPOLLIN;
 			event.callback = connCallback;
 
-			gReactor.addEvent(event);
+			gReactor.addEvent(&event);
 		}
 	}
 	
 	return NULL;
+}
+
+void *timerCallback(int fd, unsigned int events, void *arg)
+{
+	cout << "timer callback" << endl;
+	unsigned long long cnt = 0;
+
+	read(fd, &cnt, sizeof(unsigned long long));
 }
 
 int main(int argc, char **argv)
@@ -87,16 +96,26 @@ int main(int argc, char **argv)
 	listen(listenfd, 5);
 
 	memset(&event, sizeof(event), 0);
+	event.flag = EVENT_FLAG_EVENT;
 	event.fd = listenfd;
 	event.callback = listenCallback;
 	event.events = EPOLLIN;
-	gReactor.addEvent(event);
+	gReactor.addEvent(&event);
 
 	memset(&event, sizeof(event), 0);
+	event.flag = EVENT_FLAG_EVENT;
 	event.fd = STDIN_FILENO;
 	event.callback = stdinCallback;
 	event.events = EPOLLIN;
-	gReactor.addEvent(event);
+	gReactor.addEvent(&event);
+
+	memset(&event, sizeof(event), 0);
+	event.callback = timerCallback;
+	event.flag = EVENT_FLAG_TIMER;
+	event.data.timer.value.it_value.tv_sec = 1;
+	event.data.timer.value.it_interval.tv_sec = 1;
+	event.data.timer.num = 5;
+	gReactor.addEvent(&event);
 
 	while (gRunning) {
 		gReactor.dispatcher();

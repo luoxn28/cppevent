@@ -46,7 +46,7 @@ public:
 		}
 	}
 	
-	virtual int addEvent(const Event &event);
+	virtual int addEvent(Event *event);
 	virtual int delEvent(const Event &event);
 	virtual int delEvent(int fd);
 	virtual int dispatcher();

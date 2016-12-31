@@ -27,9 +27,9 @@ struct Event
 	void *arg;			     /* the parameter of callback function */
 	int flag;				 /* flag of event */
 
-	union data {
+	union data_t {
 		TimerInfo timer;
-	};
+	} data;
 
 	Event() {
 		memset(this, 0, sizeof(this));

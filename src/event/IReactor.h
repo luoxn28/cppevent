@@ -12,7 +12,7 @@
 class IReactor
 {
 public:
-	virtual int addEvent(const Event &event) = 0;
+	virtual int addEvent(Event *event) = 0;
 	virtual int delEvent(const Event &event) = 0;
 	virtual int delEvent(int fd) = 0;
 	virtual int dispatcher() = 0;
